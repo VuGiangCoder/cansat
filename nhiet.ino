@@ -16,6 +16,7 @@ const char* password = "23456789";
 AsyncWebServer server(80);
 uint8_t DHTPin = 18; 
 DHT dht(DHTPin, DHTTYPE);   
+PID pid(&currentTemp, &output, &setpoint, Kp, Ki, Kd, DIRECT);  
 
 
 int data_count = 1000;
@@ -88,6 +89,10 @@ String getDistance1() {
 
 void setup () {
   // Serial port for debugging purposes
+  pid.SetMode(AUTOMATIC);
+  pid.SetOutputLimits(0, 255);  
+  pid.SetSampleTime(1000);  // Set PID control loop to run every 1 second
+
   Serial.begin (115200);
   delay(100);
   pinMode(pwmPin_1, OUTPUT);
@@ -123,8 +128,6 @@ void setup () {
    server.on ("/humidity", HTTP_GET, [] (AsyncWebServerRequest * request) {
     request-> send_P (200, "text / plain", getDistance1(). c_str ());
   });
-
-
   // start server
   server.begin ();
 }
